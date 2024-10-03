@@ -17,7 +17,21 @@ const OPTION_WITH_RELATIVE_PATH = 'withRelativePath'
 const OPTION_WITH_FILE_NAME = 'withFileName'
 
 const MULTI_SELECTION_SEPARATOR = '---'
-
+function formSpaceNum(s){
+  let count = 0
+  if(s.length == 0){
+    return 10000
+  }
+  for(let i = 0; i < s.length; i++){
+    if(s[i] == ' '){
+      count++;
+    }
+    else{
+      break;
+    }
+  }
+  return count
+}
 function copyWithLineNumbers(option?) {
   const editor = vscode.window.activeTextEditor
   if (!editor) {
@@ -55,12 +69,16 @@ function copyWithLineNumbers(option?) {
 
   selections.forEach((selection, i) => {
     if (i > 0) str += `${MULTI_SELECTION_SEPARATOR}${EOL}`
-
+    let formSpace = 100000;
+    for (let n = selection.start.line; n <= selection.end.line; n += 1) {
+      const line = document.lineAt(n).text
+      formSpace = Math.min(formSpace,formSpaceNum(line))
+    }
     for (let n = selection.start.line; n <= selection.end.line; n += 1) {
       const number = leftPad(n + 1, largestLineNumberLength, 0)
       const line = document.lineAt(n).text
 
-      str += `${number}: ${line}${EOL}`
+      str += `${number}: ${line.slice(formSpace)}${EOL}`
     }
   })
 
@@ -84,3 +102,6 @@ export const commands = {
     copyWithLineNumbers(OPTION_WITH_FILE_NAME)
   },
 }
+
+
+
